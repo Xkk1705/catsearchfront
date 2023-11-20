@@ -20,11 +20,10 @@
         <PostList :post-list="postListData" />
       </a-tab-pane>
       <a-tab-pane key="picture" tab="图片" force-render>
-        <PictureList />
+        <PictureList :picture-list="pictureListData" />
       </a-tab-pane>
       <a-tab-pane key="user" tab="用户">
         <UserList :user-list="userListData" />
-        {{ userListData }}
       </a-tab-pane>
     </a-tabs>
   </div>
@@ -84,6 +83,33 @@ const onLoadData = async (params: any) => {
       pictureListData.value = pictureRes.records;
     });
 };
+
+// 加载聚合数据
+const LoadData = async (params: any) => {
+  const postQuery = {
+    ...params,
+    searchText: params.text,
+  };
+  const res: any = await myAxios.post("/search/all", postQuery).then((res) => {
+    postListData.value = res.postVOList;
+    userListData.value = res.userVOList;
+    pictureListData.value = res.pictureList;
+  });
+};
+
+// 加载分类的聚合数据
+const LoadDataByType = async (params: any) => {
+  const postQuery = {
+    ...params,
+    searchText: params.text,
+  };
+  const res: any = await myAxios.post("/search/kind", postQuery).then((res) => {
+    postListData.value = res.postVOList;
+    userListData.value = res.userVOList;
+    pictureListData.value = res.pictureList;
+  });
+};
+
 const searchParams = ref(initParams);
 // eslint-disable-next-line no-undef
 watchEffect(() => {
@@ -92,21 +118,9 @@ watchEffect(() => {
     text: searchText.value,
     type: activeKey.value,
   } as any;
-  onLoadData(searchParams.value);
+  LoadDataByType(searchParams.value);
 });
-// onMounted(async () => {
-//   const postRes: any = await myAxios
-//     .post("/post/list/page/vo", {})
-//     .then((postRes) => {
-//       postListData.value = postRes.records;
-//     });
-//
-//   const userRes: any = await myAxios
-//     .post("/user/list/page/vo", {})
-//     .then((userRes) => {
-//       userListData.value = userRes.records;
-//     });
-// });
+
 const onSearch = (searchValue: string) => {
   router.push({
     name: "home",
